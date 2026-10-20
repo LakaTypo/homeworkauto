@@ -45,7 +45,7 @@ input:focus{border-color:var(--accent)}.btn{width:100%;border:0;border-radius:9p
     <p class="sub" id="otpHint">Enter the code we sent to your email.</p>
     <button class="btn" id="btnOtp" type="submit">Verify email &amp; continue</button>
   </form>
-  <div class="links"><a href="/login">Already have an account?</a><a href="/">Home</a></div>
+  <div class="links"><a href="login.html">Already have an account?</a><a href="index.html">Home</a></div>
 </div>
 <script>
 (() => {
@@ -107,7 +107,7 @@ input:focus{border-color:var(--accent)}.btn{width:100%;border:0;border-radius:9p
       if (!r.ok) throw Error(x.error || 'Verification failed');
       if (x.token) saveAuthToken(x.token);
       showOk('Verified — opening dashboard…');
-      location.href = (window.STUDYFLOW_API ? 'dashboard.html' : '/dashboard');
+      location.href = 'dashboard.html';
     } catch (ex) {
       showErr(ex.message || 'Invalid code.');
       btn.disabled = false;
