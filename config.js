@@ -1,33 +1,46 @@
 (function () {
   function setApi(url) {
     url = String(url || "").trim().replace(/\/$/, "");
-    window.STUDYFLOW_API = url;
-    if (url) localStorage.setItem("studyflow_api", url);
-    else localStorage.removeItem("studyflow_api");
+    window.HOMEWORK_AUTO_API = url;
+    if (url) localStorage.setItem("homework_auto_api", url);
+    else localStorage.removeItem("homework_auto_api");
   }
-  const params = new URLSearchParams(location.search);
+  var params = new URLSearchParams(location.search);
   if (params.get("api")) setApi(params.get("api"));
-  else if (localStorage.getItem("studyflow_api")) setApi(localStorage.getItem("studyflow_api"));
-  else window.STUDYFLOW_API = "";
+  else if (localStorage.getItem("homework_auto_api")) setApi(localStorage.getItem("homework_auto_api"));
+  else window.HOMEWORK_AUTO_API = "";
 
-  fetch("api.txt", { cache: "no-store" }).then(function (r) {
-    if (!r.ok) return null;
-    return r.text();
-  }).then(function (t) {
-    if (!t) return;
-    var line = t.split(/\r?\n/).map(function (x) { return x.trim(); }).filter(Boolean)[0];
-    if (line && !params.get("api") && !localStorage.getItem("studyflow_api")) setApi(line);
-  }).catch(function () {});
+  window.__haApiReady = fetch("api.txt", { cache: "no-store" })
+    .then(function (r) { return r.ok ? r.text() : ""; })
+    .then(function (t) {
+      if (!t) return;
+      var line = t.split(/\r?\n/).map(function (x) { return x.trim(); }).filter(Boolean)[0];
+      if (line) setApi(line);
+    })
+    .catch(function () {})
+    .then(function () {
+      document.querySelectorAll("[data-api-field]").forEach(function (el) {
+        if (window.HOMEWORK_AUTO_API) {
+          el.style.display = "none";
+          var input = el.querySelector("input");
+          if (input) input.value = window.HOMEWORK_AUTO_API;
+        }
+      });
+    });
 
-  window.setStudyflowApi = setApi;
+  window.setHomework AutoApi = setApi;
   window.apiUrl = function (path) {
     if (!path.startsWith("/")) path = "/" + path;
-    return window.STUDYFLOW_API ? window.STUDYFLOW_API + path : path;
+    return window.HOMEWORK_AUTO_API ? window.HOMEWORK_AUTO_API + path : path;
   };
   window.apiHeaders = function (extra) {
     var h = Object.assign({ "Content-Type": "application/json" }, extra || {});
-    var tok = localStorage.getItem("studyflow_token");
+    var tok = localStorage.getItem("homework_auto_token");
     if (tok) h["Authorization"] = "Bearer " + tok;
+    // ngrok free interstitial bypass
+    if ((window.HOMEWORK_AUTO_API || "").indexOf("ngrok") !== -1) {
+      h["ngrok-skip-browser-warning"] = "1";
+    }
     return h;
   };
   window.apiFetch = function (path, opts) {
@@ -37,9 +50,9 @@
     return fetch(apiUrl(path), opts);
   };
   window.saveAuthToken = function (token) {
-    if (token) localStorage.setItem("studyflow_token", token);
+    if (token) localStorage.setItem("homework_auto_token", token);
   };
   window.clearAuthToken = function () {
-    localStorage.removeItem("studyflow_token");
+    localStorage.removeItem("homework_auto_token");
   };
 })();
