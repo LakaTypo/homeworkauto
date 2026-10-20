@@ -71,7 +71,6 @@ main{min-width:0;padding:28px clamp(18px,4vw,48px) 44px;max-width:1450px;width:1
     </div>
     <div>
       <section class="card"><div class="card-head"><div><h3>School details</h3><div class="sub">Used to connect to your school platform</div></div></div>
-        <div class="field" data-api-field><label for="apiUrl">Backend API link</label><input id="apiUrl" type="url" placeholder="https://your-tunnel.ngrok-free.app"><div class="hint">Only shown if api.txt is empty. Edit pages/api.txt to set the default.</div></div>
         <div class="field"><label for="school">School name</label><input id="school" type="text" placeholder="Enter your school name" autocomplete="organization"></div>
         <div class="field"><label for="username">School username or email</label><input id="username" type="text" placeholder="Username or school email" autocomplete="username"></div>
         <div class="field"><label for="password">School password</label><input id="password" type="password" placeholder="Enter only when using normal login" autocomplete="current-password"></div>
@@ -148,11 +147,7 @@ main{min-width:0;padding:28px clamp(18px,4vw,48px) 44px;max-width:1450px;width:1
  $('resetBtn').addEventListener('click'
 ,()=>{if(busy){alert('Stop the active session before resetting.');return}renderTasks({});panel.innerHTML='<div class="empty">Your session activity will appear here.</div>';logsSignature='';$('logCount').textContent='0 events';addLog('Progress view reset. This does not change work on your school account.')});
  $('stopBtn').addEventListener('click',async()=>{try{const r=await apiFetch('/api/stop',{method:'POST',body:JSON.stringify({session:sessionId})});if(!r.ok)throw Error();addLog('Stop requested.','warn');await refresh()}catch(e){addLog('Stop endpoint is not available in the current backend.','warn')}});
- $('logoutBtn').addEventListener('click',async()=>{try{await apiFetch('/api/auth/logout',{method:'POST'}).then(()=>clearAuthToken());}catch(e){}location.href='login.html';});const apiInput=$('apiUrl');
- if(apiInput){apiInput.value=window.HOMEWORK_AUTO_API||localStorage.getItem('homework_auto_api')||'';
- apiInput.addEventListener('change',()=>{setHomework AutoApi(apiInput.value);addLog('API set to '+(window.HOMEWORK_AUTO_API||'(same origin)'),'ok');});
- apiInput.addEventListener('blur',()=>setHomework AutoApi(apiInput.value));}
- setSubject('maths');renderTasks({});addLog('Dashboard ready. Choose a subject and press Start.');refresh();setInterval(refresh,1800);
+ $('logoutBtn').addEventListener('click',async()=>{try{await apiFetch('/api/auth/logout',{method:'POST'}).then(()=>clearAuthToken());}catch(e){}location.href='login.html';});setSubject('maths');renderTasks({});addLog('Dashboard ready. Choose a subject and press Start.');refresh();setInterval(refresh,1800);
 })();
 </script>
 </body></html>
