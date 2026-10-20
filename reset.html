@@ -38,7 +38,7 @@ input{width:100%;background:#0e1112;border:1px solid #303739;color:var(--text);b
     <input id="password2" type="password" minlength="8" required>
     <button class="btn" type="submit">Update password</button>
   </form>
-  <div class="links"><a href="/login">Back to log in</a></div>
+  <div class="links"><a href="login.html">Back to log in</a></div>
 </div>
 <script>
 (() => {
@@ -71,7 +71,7 @@ input{width:100%;background:#0e1112;border:1px solid #303739;color:var(--text);b
       const x = await r.json();
       if (!r.ok) throw Error(x.error || 'Reset failed');
       showOk('Password updated. You can log in now.');
-      setTimeout(() => location.href = '/login', 1200);
+      setTimeout(() => location.href='login.html', 1200);
     } catch (ex) { showErr(ex.message); }
   });
 })();
