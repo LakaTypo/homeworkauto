@@ -96,7 +96,7 @@ main{min-width:0;padding:28px clamp(18px,4vw,48px) 44px;max-width:1450px;width:1
 (() => {
  const $=id=>document.getElementById(id);
  // Require login
- apiFetch('/api/auth/me',{cache:'no-store'}).then(r=>{if(!r.ok)location.href='/login';return r.json()}).catch(()=>location.href='/login');
+ apiFetch('/api/auth/me',{cache:'no-store'}).then(r=>{if(!r.ok)location.href='login.html';return r.json()}).catch(()=>location.href='login.html');
 
  let subject='maths', sessionId=sessionStorage.getItem('studyflow_session')||'', logsSignature='', busy=false;
  const labels={maths:'Maths',science:'Science',reader:'Reading'};
@@ -148,7 +148,7 @@ main{min-width:0;padding:28px clamp(18px,4vw,48px) 44px;max-width:1450px;width:1
  $('resetBtn').addEventListener('click'
 ,()=>{if(busy){alert('Stop the active session before resetting.');return}renderTasks({});panel.innerHTML='<div class="empty">Your session activity will appear here.</div>';logsSignature='';$('logCount').textContent='0 events';addLog('Progress view reset. This does not change work on your school account.')});
  $('stopBtn').addEventListener('click',async()=>{try{const r=await apiFetch('/api/stop',{method:'POST',body:JSON.stringify({session:sessionId})});if(!r.ok)throw Error();addLog('Stop requested.','warn');await refresh()}catch(e){addLog('Stop endpoint is not available in the current backend.','warn')}});
- $('logoutBtn').addEventListener('click',async()=>{try{await apiFetch('/api/auth/logout',{method:'POST'}).then(()=>clearAuthToken());}catch(e){}location.href='/login';});const apiInput=$('apiUrl');
+ $('logoutBtn').addEventListener('click',async()=>{try{await apiFetch('/api/auth/logout',{method:'POST'}).then(()=>clearAuthToken());}catch(e){}location.href='login.html';});const apiInput=$('apiUrl');
  if(apiInput){apiInput.value=window.STUDYFLOW_API||localStorage.getItem('studyflow_api')||'';
  apiInput.addEventListener('change',()=>{setStudyflowApi(apiInput.value);addLog('API set to '+(window.STUDYFLOW_API||'(same origin)'),'ok');});
  apiInput.addEventListener('blur',()=>setStudyflowApi(apiInput.value));}
