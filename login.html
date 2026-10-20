@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>HomeworkAuto · Log in</title>
+<title>StudyFlow · Log in</title>
 <script src="config.js"></script>
 <style>
 :root{--bg:#0b0d0f;--panel:#141719;--line:#2a3033;--text:#f2f4f4;--muted:#8c969b;--accent:#f2a72c;--red:#f17878;--green:#52d39a}
@@ -22,12 +22,14 @@ input:focus{border-color:var(--accent)}.btn{width:100%;border:0;border-radius:9p
 </head>
 <body>
 <div class="card">
-  <div class="brand"><div class="mark">HA</div>HomeworkAuto</div>
+  <div class="brand"><div class="mark">S</div>StudyFlow</div>
   <h1>Log in</h1>
   <p class="sub">Enter your password, then the 6-digit code we email you.</p>
   <div class="err" id="err"></div>
   <div class="ok" id="ok"></div>
   <form id="stepPass">
+    <label for="apiUrl">Backend API link</label>
+    <input id="apiUrl" type="url" placeholder="http://127.0.0.1:8525 or https://….localhost.run">
     <label for="email">Email</label>
     <input id="email" type="email" required autocomplete="username">
     <label for="password">Password</label>
@@ -48,6 +50,8 @@ input:focus{border-color:var(--accent)}.btn{width:100%;border:0;border-radius:9p
 </div>
 <script>
 (() => {
+  const apiIn=document.getElementById('apiUrl');
+  if(apiIn){apiIn.value=window.STUDYFLOW_API||localStorage.getItem('studyflow_api')||'';apiIn.addEventListener('change',()=>setStudyflowApi(apiIn.value));}
   const err = document.getElementById('err');
   const ok = document.getElementById('ok');
   const stepPass = document.getElementById('stepPass');
@@ -102,7 +106,7 @@ input:focus{border-color:var(--accent)}.btn{width:100%;border:0;border-radius:9p
       if (!r.ok) throw Error(x.error || 'Verification failed');
       if (x.token) saveAuthToken(x.token);
       showOk('Verified — opening dashboard…');
-      location.href = (window.HomeworkAuto_API ? 'dashboard.html' : '/dashboard');
+      location.href = (window.STUDYFLOW_API ? 'dashboard.html' : '/dashboard');
     } catch (ex) {
       showErr(ex.message || 'Invalid code.');
       btn.disabled = false;
