@@ -43,10 +43,10 @@ input:focus{border-color:var(--accent)}.btn{width:100%;border:0;border-radius:9p
     <button class="btn" id="btnOtp" type="submit">Verify &amp; go to dashboard</button>
   </form>
   <div class="links">
-    <a href="/signup">Create account</a>
-    <a href="/reset">Reset password</a>
+    <a href="signup.html">Create account</a>
+    <a href="reset.html">Reset password</a>
   </div>
-  <div class="links" style="margin-top:8px"><a href="/">← Home</a><a href="/change-password">Change password</a></div>
+  <div class="links" style="margin-top:8px"><a href="index.html">← Home</a><a href="change_password.html">Change password</a></div>
 </div>
 <script>
 (() => {
@@ -106,7 +106,7 @@ input:focus{border-color:var(--accent)}.btn{width:100%;border:0;border-radius:9p
       if (!r.ok) throw Error(x.error || 'Verification failed');
       if (x.token) saveAuthToken(x.token);
       showOk('Verified — opening dashboard…');
-      location.href = (window.STUDYFLOW_API ? 'dashboard.html' : '/dashboard');
+      location.href = 'dashboard.html';
     } catch (ex) {
       showErr(ex.message || 'Invalid code.');
       btn.disabled = false;
