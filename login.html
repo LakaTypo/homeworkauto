@@ -48,7 +48,7 @@ input:focus{border-color:var(--accent)}.btn{width:100%;border:0;border-radius:9p
 </div>
 <script>
 (() => {
-  Promise.resolve(window.__haApiReady).then(function(){var apiIn=document.getElementById('apiUrl');if(apiIn){apiIn.value=window.HOMEWORK_AUTO_API||'';apiIn.addEventListener('change',function(){setHomework AutoApi(apiIn.value);});}});
+  
   const err = document.getElementById('err');
   const ok = document.getElementById('ok');
   const stepPass = document.getElementById('stepPass');
@@ -96,7 +96,12 @@ input:focus{border-color:var(--accent)}.btn{width:100%;border:0;border-radius:9p
     btn.disabled = true;
     btn.textContent = 'Verifying…';
     try {
-      const r = await apiFetch('/api/auth/verify-login', { method: 'POST', body: JSON.stringify({ email: pendingEmail, code: document.getElementById('otp').value.trim() }) }).value.trim() })
+      const r = await apiFetch('/api/auth/verify-login', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: pendingEmail,
+          code: document.getElementById('otp').value.trim()
+        })
       });
       let x = {};
       try { x = await r.json(); } catch (_) { throw Error('Server returned an invalid response.'); }
@@ -111,6 +116,7 @@ input:focus{border-color:var(--accent)}.btn{width:100%;border:0;border-radius:9p
     }
   });
 })();
+
 </script>
 </body>
 </html>
