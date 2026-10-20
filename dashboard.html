@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>HomeworkAuto · Dashboard</title>
+<title>StudyFlow · Dashboard</title>
 <style>
 :root{--bg:#0b0d0f;--panel:#141719;--panel2:#1b1f22;--line:#2a3033;--text:#f2f4f4;--muted:#8c969b;--accent:#f2a72c;--green:#52d39a;--blue:#61b8f2;--red:#f17878}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
@@ -26,7 +26,7 @@ main{min-width:0;padding:28px clamp(18px,4vw,48px) 44px;max-width:1450px;width:1
 <body>
 <div class="app">
 <aside>
-  <div class="brand"><div class="brand-mark">HA</div><span class="brand-text">Homework Auto</span></div>
+  <div class="brand"><div class="brand-mark">S</div><span class="brand-text">StudyFlow</span></div>
   <div><div class="nav-label">Workspace</div><nav class="nav" aria-label="Subjects">
     <button class="active" data-subject="maths"><span class="ico">∑</span><span class="nav-text">Maths</span></button>
     <button data-subject="science"><span class="ico">⚛</span><span class="nav-text">Science</span></button>
@@ -56,7 +56,7 @@ main{min-width:0;padding:28px clamp(18px,4vw,48px) 44px;max-width:1450px;width:1
           <div class="field"><label for="endSection">End task</label><select id="endSection"><option value="1">Task 1</option><option value="2">Task 2</option><option value="3">Task 3</option><option value="4">Task 4</option><option value="5">Task 5</option><option value="6" selected>Task 6 · Flashcards</option></select></div>
         </div>
         <div class="field"><label for="waitTime">Delay between questions (seconds)</label><input id="waitTime" type="number" min="0" max="3600" value="25"></div>
-        <div id="packagePicker" style="display:none;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">
+        <div id="packagePicker" style="display:none !important;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">
           <label for="homeworkPackage">Choose homework package</label>
           <select id="homeworkPackage" disabled><option value="">Packages appear after Sparx loads…</option></select>
           <p class="hint" style="margin-top:6px">Pick the homework shown on your Sparx page, then confirm.</p>
@@ -71,6 +71,7 @@ main{min-width:0;padding:28px clamp(18px,4vw,48px) 44px;max-width:1450px;width:1
     </div>
     <div>
       <section class="card"><div class="card-head"><div><h3>School details</h3><div class="sub">Used to connect to your school platform</div></div></div>
+        <div class="field"><label for="apiUrl">Backend API link (api.txt)</label><input id="apiUrl" type="url" placeholder="http://127.0.0.1:8525 or https://….localhost.run"><div class="hint">Paste your tunnel/backend URL here. Saved in this browser. You can also put it in pages/api.txt.</div></div>
         <div class="field"><label for="school">School name</label><input id="school" type="text" placeholder="Enter your school name" autocomplete="organization"></div>
         <div class="field"><label for="username">School username or email</label><input id="username" type="text" placeholder="Username or school email" autocomplete="username"></div>
         <div class="field"><label for="password">School password</label><input id="password" type="password" placeholder="Enter only when using normal login" autocomplete="current-password"></div>
@@ -97,7 +98,7 @@ main{min-width:0;padding:28px clamp(18px,4vw,48px) 44px;max-width:1450px;width:1
  // Require login
  apiFetch('/api/auth/me',{cache:'no-store'}).then(r=>{if(!r.ok)location.href='/login';return r.json()}).catch(()=>location.href='/login');
 
- let subject='maths', sessionId=sessionStorage.getItem('HomeworkAuto_session')||'', logsSignature='', busy=false;
+ let subject='maths', sessionId=sessionStorage.getItem('studyflow_session')||'', logsSignature='', busy=false;
  const labels={maths:'Maths',science:'Science',reader:'Reading'};
  const panel=$('logPanel'),startBtn=$('startBtn');
  function showError(msg){const b=$('errorBanner');if(!msg){b.classList.remove('show');b.textContent='';return}b.textContent='Error: '+msg;b.classList.add('show');addLog(msg,'warn')}
@@ -108,7 +109,7 @@ main{min-width:0;padding:28px clamp(18px,4vw,48px) 44px;max-width:1450px;width:1
  document.querySelectorAll('[data-subject]').forEach(b=>b.addEventListener('click',()=>setSubject(b.dataset.subject)));
  function renderTasks(progress={}){const list=$('taskList');list.replaceChildren();let done=0,working=0;for(let i=1;i<=6;i++){const st=progress[i]||progress[String(i)]||'pending';if(st==='done')done++;if(st==='active')working++;const row=document.createElement('div');row.className='progress-row';const left=document.createElement('div');left.className='task-name';const num=document.createElement('span');num.className='task-num';if(st==='active'){num.innerHTML='<span class="spinner"></span>'}else num.textContent=st==='done'?'✓':String(i);const name=document.createElement('span');name.textContent=i===6?'Task 6 · Flashcards':'Task '+i;left.append(num,name);const badge=document.createElement('span');badge.className='badge '+(st==='done'?'done':st==='active'?'active':st==='skip'?'skip':'');badge.textContent=st==='done'?'Completed':st==='active'?'Working':st==='skip'?'Skipped':'Pending';row.append(left,badge);list.append(row)}$('completedCount').innerHTML=done+' <span style="font-size:12px;color:var(--muted);font-weight:500">/ 6</span>';$('workingCount').textContent=working;$('progressBadge').textContent=done===6?'All completed':working?'In progress':done?'Partially complete':'Not started'}
  function renderLogs(a){if(!Array.isArray(a))return;const sig=a.map(x=>(x.time||'')+(x.message||'')+(x.kind||'')).join('|');if(sig===logsSignature)return;logsSignature=sig;panel.replaceChildren();a.slice(-80).forEach(x=>{const kind=x.kind==='working'?'info':/completed|already has been completed/i.test(x.message||'')?'ok':/error|failed/i.test(x.message||'')?'warn':'info';const d=document.createElement('div');d.className='log-line '+kind;const t=document.createElement('span');t.className='time';t.textContent='['+(x.time||'--:--:--')+']';d.append(t,document.createTextNode(' '+String(x.message||'')));panel.append(d)});if(!a.length){panel.innerHTML='<div class="empty">No activity yet.</div>'}$('logCount').textContent=a.length+' events'}
- async function refresh(){try{const url=sessionId?'/api/status?session='+encodeURIComponent(sessionId):'/api/status';const r=await apiFetch(url,{cache:'no-store'});if(!r.ok)throw Error('Service unavailable');const x=await r.json();if(x.session&&!sessionId){sessionId=x.session;sessionStorage.setItem('HomeworkAuto_session',sessionId)}if(x.status==='error'){showError(x.message||'Session error');}else if(x.status==='running'||x.status==='idle'||x.status==='starting'){if(x.status!=='error'){/* leave banner until next error */}} setStatus(x.status,x.message);if(x.task_progress)renderTasks(x.task_progress);if(x.logs)renderLogs(x.logs);$('connectionNote').textContent=(window.HomeworkAuto_API?'Connected to '+window.HomeworkAuto_API:'Connected to local service')+(x.active_user?' · '+x.active_user:'');const picker=$('packagePicker'),sel=$('homeworkPackage'),selBtn=$('selectPackageBtn');
+ async function refresh(){try{const url=sessionId?'/api/status?session='+encodeURIComponent(sessionId):'/api/status';const r=await apiFetch(url,{cache:'no-store'});if(!r.ok)throw Error('Service unavailable');const x=await r.json();if(x.session&&!sessionId){sessionId=x.session;sessionStorage.setItem('studyflow_session',sessionId)}if(x.status==='error'){showError(x.message||'Session error');}else if(x.status==='running'||x.status==='idle'||x.status==='starting'){if(x.status!=='error'){/* leave banner until next error */}} setStatus(x.status,x.message);if(x.task_progress)renderTasks(x.task_progress);if(x.logs)renderLogs(x.logs);$('connectionNote').textContent=(window.STUDYFLOW_API?'Connected to '+window.STUDYFLOW_API:'Connected to local service')+(x.active_user?' · '+x.active_user:'');const picker=$('packagePicker'),sel=$('homeworkPackage'),selBtn=$('selectPackageBtn');
  if(x.status==='awaiting_selection'){
   busy=true;startBtn.disabled=true;$('stopBtn').disabled=false;
   picker.style.display='block';
@@ -130,7 +131,7 @@ main{min-width:0;padding:28px clamp(18px,4vw,48px) 44px;max-width:1450px;width:1
  function openModal(){if(!$('school').value.trim()){alert('Enter your school name first.');$('school').focus();return}if(!Number.isFinite(Number($('waitTime').value))||Number($('waitTime').value)<0){alert('Enter a delay of 0 seconds or more.');return}if(subject==='maths'&&Number($('startSection').value)>Number($('endSection').value)){alert('Start task must be before or equal to end task.');return}$('loginModal').classList.add('open')}
  function closeModal(){$('loginModal').classList.remove('open')}
  startBtn.addEventListener('click',openModal);$('cancelLogin').addEventListener('click',closeModal);$('loginModal').addEventListener('click',e=>{if(e.target===$('loginModal'))closeModal()});
- document.querySelectorAll('[data-login]').forEach(b=>b.addEventListener('click',async()=>{const method=b.dataset.login;closeModal();const sso=method==='google'||method==='microsoft';const username=$('username').value.trim(),password=$('password').value; if(!sso&&(!username||!password)){alert('For normal login, enter your school username and password.');$('password').focus();return}const payload={subject,school:$('school').value.trim(),login_method:method,username,password,microsoft_email:sso?username:'',microsoft_password:sso?password:'',startSection:Number($('startSection').value),endSection:Number($('endSection').value),waitTime:Number($('waitTime').value)};startBtn.disabled=true;setStatus('starting','Starting…');addLog('Starting '+labels[subject]+' session using '+(method==='sparx'?'normal login':method==='google'?'Google sign-in':'Microsoft sign-in')+'.');try{const r=await apiFetch('/api/start',{method:'POST',body:JSON.stringify(payload)});const x=await r.json();if(!r.ok)throw Error(x.error||'Could not start session');if(x.session){sessionId=x.session;sessionStorage.setItem('HomeworkAuto_session',sessionId)}$('password').value='';busy=true;window.__pkgPrompted=false;addLog('Session request accepted. Waiting for task updates…','ok');await refresh()}catch(e){showError(e.message||'Could not connect to the service.');$('connectionNote').textContent='Backend unavailable or request failed. Start the compatible local backend and try again.';startBtn.disabled=false;busy=false}}));
+ document.querySelectorAll('[data-login]').forEach(b=>b.addEventListener('click',async()=>{const method=b.dataset.login;closeModal();const sso=method==='google'||method==='microsoft';const username=$('username').value.trim(),password=$('password').value; if(!sso&&(!username||!password)){alert('For normal login, enter your school username and password.');$('password').focus();return}const payload={subject,school:$('school').value.trim(),login_method:method,username,password,microsoft_email:sso?username:'',microsoft_password:sso?password:'',startSection:Number($('startSection').value),endSection:Number($('endSection').value),waitTime:Number($('waitTime').value)};startBtn.disabled=true;setStatus('starting','Starting…');addLog('Starting '+labels[subject]+' session using '+(method==='sparx'?'normal login':method==='google'?'Google sign-in':'Microsoft sign-in')+'.');try{const r=await apiFetch('/api/start',{method:'POST',body:JSON.stringify(payload)});const x=await r.json();if(!r.ok)throw Error(x.error||'Could not start session');if(x.session){sessionId=x.session;sessionStorage.setItem('studyflow_session',sessionId)}$('password').value='';busy=true;window.__pkgPrompted=false;addLog('Session request accepted. Waiting for task updates…','ok');await refresh()}catch(e){showError(e.message||'Could not connect to the service.');$('connectionNote').textContent='Backend unavailable or request failed. Start the compatible local backend and try again.';startBtn.disabled=false;busy=false}}));
  $('selectPackageBtn').addEventListener('click',async()=>{
  const idx=$('homeworkPackage').value;
  if(idx===''){showError('Choose a homework package first.');return;}
@@ -147,7 +148,11 @@ main{min-width:0;padding:28px clamp(18px,4vw,48px) 44px;max-width:1450px;width:1
  $('resetBtn').addEventListener('click'
 ,()=>{if(busy){alert('Stop the active session before resetting.');return}renderTasks({});panel.innerHTML='<div class="empty">Your session activity will appear here.</div>';logsSignature='';$('logCount').textContent='0 events';addLog('Progress view reset. This does not change work on your school account.')});
  $('stopBtn').addEventListener('click',async()=>{try{const r=await apiFetch('/api/stop',{method:'POST',body:JSON.stringify({session:sessionId})});if(!r.ok)throw Error();addLog('Stop requested.','warn');await refresh()}catch(e){addLog('Stop endpoint is not available in the current backend.','warn')}});
- $('logoutBtn').addEventListener('click',async()=>{try{await apiFetch('/api/auth/logout',{method:'POST'}).then(()=>clearAuthToken());}catch(e){}location.href='/login';});setSubject('maths');renderTasks({});addLog('Dashboard ready. Choose a subject and press Start.');refresh();setInterval(refresh,1800);
+ $('logoutBtn').addEventListener('click',async()=>{try{await apiFetch('/api/auth/logout',{method:'POST'}).then(()=>clearAuthToken());}catch(e){}location.href='/login';});const apiInput=$('apiUrl');
+ if(apiInput){apiInput.value=window.STUDYFLOW_API||localStorage.getItem('studyflow_api')||'';
+ apiInput.addEventListener('change',()=>{setStudyflowApi(apiInput.value);addLog('API set to '+(window.STUDYFLOW_API||'(same origin)'),'ok');});
+ apiInput.addEventListener('blur',()=>setStudyflowApi(apiInput.value));}
+ setSubject('maths');renderTasks({});addLog('Dashboard ready. Choose a subject and press Start.');refresh();setInterval(refresh,1800);
 })();
 </script>
 </body></html>
