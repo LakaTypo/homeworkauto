@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Homework Auto · Sign up</title>
+<script src="config.js"></script>
+<style>
+:root{--bg:#0b0d0f;--panel:#141719;--line:#2a3033;--text:#f2f4f4;--muted:#8c969b;--accent:#f2a72c;--red:#f17878;--green:#52d39a}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font:14px/1.5 Inter,ui-sans-serif,system-ui,sans-serif;display:grid;place-items:center;padding:24px}
+a{color:var(--accent)}.card{width:min(420px,100%);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:750;margin-bottom:18px}.mark{width:30px;height:30px;border-radius:9px;background:var(--accent);color:#151515;display:grid;place-items:center;font-weight:900}
+h1{font-size:22px;margin:0 0 6px}.sub{color:var(--muted);font-size:13px;margin:0 0 20px}
+label{display:block;color:#aab2b5;font-size:12px;margin-bottom:6px}
+input{width:100%;background:#0e1112;border:1px solid #303739;color:var(--text);border-radius:8px;padding:11px 12px;margin-bottom:14px;outline:none}
+input:focus{border-color:var(--accent)}.btn{width:100%;border:0;border-radius:9px;padding:12px;font-weight:700;background:var(--accent);color:#17130b;cursor:pointer}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.err{display:none;background:#2b1718;border:1px solid #633032;color:var(--red);border-radius:9px;padding:10px 12px;margin-bottom:14px;font-size:13px;font-weight:600}
+.err.show{display:block}.ok{display:none;background:#173126;border:1px solid #2a5a42;color:var(--green);border-radius:9px;padding:10px 12px;margin-bottom:14px;font-size:13px}
+.ok.show{display:block}.hidden{display:none !important}
+.links{margin-top:14px;font-size:12px;display:flex;justify-content:space-between}
+#stepOtp{border-top:1px solid var(--line);padding-top:16px;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand"><div class="mark">HA</div>HomeworkAuto</div>
+  <h1>Create account</h1>
+  <p class="sub">We’ll email you a 6-digit code to verify your account.</p>
+  <div class="err" id="err"></div>
+  <div class="ok" id="ok"></div>
+  <form id="stepReg">
+    <label for="username">Username</label>
+    <input id="username" required minlength="3" maxlength="40" autocomplete="nickname">
+    <label for="email">Email</label>
+    <input id="email" type="email" required autocomplete="email">
+    <label for="password">Password (min 8 characters)</label>
+    <input id="password" type="password" required minlength="8" autocomplete="new-password">
+    <label for="password2">Confirm password</label>
+    <input id="password2" type="password" required minlength="8" autocomplete="new-password">
+    <button class="btn" id="btnReg" type="submit">Sign up</button>
+  </form>
+  <form id="stepOtp" class="hidden">
+    <label for="otp">2FA code (from your email)</label>
+    <input id="otp" type="text" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" placeholder="6-digit code" autocomplete="one-time-code" required>
+    <p class="sub" id="otpHint">Enter the code we sent to your email.</p>
+    <button class="btn" id="btnOtp" type="submit">Verify email &amp; continue</button>
+  </form>
+  <div class="links"><a href="/login">Already have an account?</a><a href="/">Home</a></div>
+</div>
+<script>
+(() => {
+  const err = document.getElementById('err');
+  const ok = document.getElementById('ok');
+  const stepReg = document.getElementById('stepReg');
+  const stepOtp = document.getElementById('stepOtp');
+  let pendingEmail = '';
+  function showErr(m){ err.textContent = m || 'Something went wrong.'; err.classList.add('show'); ok.classList.remove('show'); }
+  function showOk(m){ ok.textContent = m || ''; ok.classList.add('show'); err.classList.remove('show'); }
+  function showOtpStep(message, debugCode){
+    stepReg.classList.add('hidden');
+    stepOtp.classList.remove('hidden');
+    document.getElementById('otpHint').textContent = debugCode
+      ? ('Code emailed. If it did not arrive, use: ' + debugCode)
+      : 'Check your inbox (and spam) for the 6-digit code.';
+    showOk(message || 'Enter the verification code from your email.');
+    document.getElementById('otp').focus();
+  }
+  stepReg.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const password = document.getElementById('password').value;
+    if (password !== document.getElementById('password2').value) { showErr('Passwords do not match.'); return; }
+    const btn = document.getElementById('btnReg');
+    btn.disabled = true;
+    btn.textContent = 'Creating account…';
+    try {
+      const r = await apiFetch('/api/auth/signup', {
+        method: 'POST',
+        body: JSON.stringify({
+          username: document.getElementById('username').value.trim(),
+          email: document.getElementById('email').value.trim(),
+          password
+        })
+      });
+      let x = {};
+      try { x = await r.json(); } catch (_) { throw Error('Server returned an invalid response.'); }
+      if (!r.ok) throw Error(x.error || 'Sign up failed');
+      pendingEmail = document.getElementById('email').value.trim();
+      showOtpStep(x.emailed ? 'Account created. Code sent to your email.' : (x.message || 'Enter your verification code.'), x.debug_code);
+    } catch (ex) {
+      showErr(ex.message || 'Could not sign up.');
+      btn.disabled = false;
+      btn.textContent = 'Sign up';
+    }
+  });
+  stepOtp.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btnOtp');
+    btn.disabled = true;
+    btn.textContent = 'Verifying…';
+    try {
+      const r = await apiFetch('/api/auth/verify-signup', {
+        method: 'POST',
+        body: JSON.stringify({ email: pendingEmail, code: document.getElementById('otp').value.trim() })
+      });
+      let x = {};
+      try { x = await r.json(); } catch (_) { throw Error('Server returned an invalid response.'); }
+      if (!r.ok) throw Error(x.error || 'Verification failed');
+      if (x.token) saveAuthToken(x.token);
+      showOk('Verified — opening dashboard…');
+      location.href = (window.STUDYFLOW_API ? 'dashboard.html' : '/dashboard');
+    } catch (ex) {
+      showErr(ex.message || 'Invalid code.');
+      btn.disabled = false;
+      btn.textContent = 'Verify email & continue';
+    }
+  });
+})();
+</script>
+</body>
+</html>
