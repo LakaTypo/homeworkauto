@@ -17,18 +17,9 @@
       var line = t.split(/\r?\n/).map(function (x) { return x.trim(); }).filter(Boolean)[0];
       if (line) setApi(line);
     })
-    .catch(function () {})
-    .then(function () {
-      document.querySelectorAll("[data-api-field]").forEach(function (el) {
-        if (window.HOMEWORK_AUTO_API) {
-          el.style.display = "none";
-          var input = el.querySelector("input");
-          if (input) input.value = window.HOMEWORK_AUTO_API;
-        }
-      });
-    });
+    .catch(function () {});
 
-  window.setHomework AutoApi = setApi;
+  window.setHomeworkAutoApi = setApi;
   window.apiUrl = function (path) {
     if (!path.startsWith("/")) path = "/" + path;
     return window.HOMEWORK_AUTO_API ? window.HOMEWORK_AUTO_API + path : path;
@@ -37,7 +28,6 @@
     var h = Object.assign({ "Content-Type": "application/json" }, extra || {});
     var tok = localStorage.getItem("homework_auto_token");
     if (tok) h["Authorization"] = "Bearer " + tok;
-    // ngrok free interstitial bypass
     if ((window.HOMEWORK_AUTO_API || "").indexOf("ngrok") !== -1) {
       h["ngrok-skip-browser-warning"] = "1";
     }
